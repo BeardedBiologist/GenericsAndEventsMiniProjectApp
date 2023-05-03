@@ -21,47 +21,33 @@ namespace GenericsAndEventsMiniProject
             {
                 new CarModel { Manufacturer = "Toyota", Model = "Camry" },
                 new CarModel { Manufacturer = "Toyota", Model = "Corola" },
-                new CarModel { Manufacturer = "Ford", Model = "Mustang" }
+                new CarModel { Manufacturer = "Ford", Model = "HeckMustang" }
              };
 
-            people.SaveToCSV(@"/Users/joshuajamesoconnor/Projects/GenericsAndEventsMiniProjectApp/GenericsAndEventsMiniProject/people.csv");
-            cars.SaveToCSV(@"/Users/joshuajamesoconnor/Projects/GenericsAndEventsMiniProjectApp/GenericsAndEventsMiniProject/cars.csv");
 
+            DataAccess<PersonModel> peopleData = new DataAccess<PersonModel>();
+            peopleData.BadEntryFound += PeopleData_BadEntryFound;
+            peopleData.SaveToCSV(people, @"/Users/joshuajamesoconnor/Projects/GenericsAndEventsMiniProjectApp/GenericsAndEventsMiniProject/output/people.csv");
+            Console.WriteLine("Saved people to CSV");
+            Console.WriteLine();
+
+            DataAccess<CarModel> carData = new DataAccess<CarModel>();
+            carData.BadEntryFound += CarData_BadEntryFound;
+            carData.SaveToCSV(cars, @"/Users/joshuajamesoconnor/Projects/GenericsAndEventsMiniProjectApp/GenericsAndEventsMiniProject/output/cars.csv");
+            Console.WriteLine("Saved cars to CSV");
+            Console.WriteLine();
 
             Console.ReadLine();
         }
-    }
 
-    public static class DataAccess
-    {
-        public static void SaveToCSV<T>(this List<T> items, string filepath) where T: new()
+        private static void CarData_BadEntryFound(object? sender, CarModel e)
         {
-            List<string> rows = new List<string>();
+            Console.WriteLine($"Bad entry found for {e.Manufacturer} {e.Model}");
+        }
 
-            T entry = new T();
-            var cols = entry.GetType().GetProperties();
-            string row = "";
-
-            foreach (var col in cols)
-            {
-                row += $",{col.Name}";
-            }
-            row = row.Substring(1);
-            rows.Add(row);
-
-            foreach (var item in items)
-            {
-                row = "";
-
-                foreach (var col in cols)
-                {
-                    row += $",{ col.GetValue(item, null) }";
-                }
-                row = row.Substring(1);
-                rows.Add(row);
-            }
-
-            File.WriteAllLines(filepath, rows);
+        private static void PeopleData_BadEntryFound(object? sender, PersonModel e)
+        {
+            Console.WriteLine($"Bad entry found for { e.FirstName } { e.LastName }");
         }
     }
 }
